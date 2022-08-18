@@ -3,31 +3,45 @@ import { useEffect, useState } from "react";
 import Checkout from "./Checkout.jsx";
 import axios from "axios";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllUsers, postOrder, putProductStock } from "../../redux/actions";
 
 function MercadoPago() {
   const cart = useSelector((state) => state.cart);
-  console.log(cart);
-  const [datos, setDatos] = useState("");
 
+  const [datos, setDatos] = useState("");
+  const dispatch = useDispatch()
+  const orderId = useSelector(state=>state.order)
+  console.log(orderId)
+  const user = localStorage.getItem('user')
+  const json = JSON.parse(user)
+  const userId = json.id 
+  console.log(cart, 'soy el producto añadido al carrito')
+  
   useEffect(() => {
+    let isCancelled = false
+    dispatch(getAllUsers())
     if (cart.length > 0) {
       axios
-        .post(`${window.env.URL}/mercadopago`, { as: cart })
-        .then((data) => {
+      .post(`${process.env.REACT_APP_URL}/payments`, {userId:userId, as:cart })
+      .then((data) => {
+        if(!isCancelled){ 
+          dispatch(putProductStock({cart}))
+          
           setDatos(data.data);
+          localStorage.setItem("products", JSON.stringify([]));
           console.info("Contenido de data:", data);
-          console.log(cart)
-        })
+        }})
         .catch((err) => console.error(err));
+    }
+    return ()=>{
+      isCancelled = true
     }
   }, [cart]);
 
-  //   const productos = [
-  //     { title: "Producto 1", quantity: 5, price: 10.52 },
-  //     { title: "Producto 2", quantity: 15, price: 100.52 },
-  //     { title: "Producto 3", quantity: 6, price: 200 },
-  //   ];
+  console.log(cart.length, "CART LENGTH");
+
+
   return (
     <div className="a">
       {!datos ? <p>Aguarde un momento....</p> : <Checkout data={datos} />}

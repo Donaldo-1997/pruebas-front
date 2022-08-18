@@ -9,9 +9,8 @@ import Navbar2 from "../Navbar2/Navbar2";
 export default function Cart() {
   const cartProducts = useSelector((state) => state.cart);
   const dispatch = useDispatch();
-  console.log(cartProducts)
+  // console.log(cartProducts, "Soy el producto añadido al carrito")
 
-  const user = useSelector(state => state.user)
   let precios = 0;
   for (let i = 0; i < cartProducts.length; i++) {
     if (cartProducts[i].quantity === 1) {
@@ -19,7 +18,6 @@ export default function Cart() {
     } else {
       precios += cartProducts[i].price * cartProducts[i].quantity;
     }
-    console.log(precios)
   }
   const deleteProduct = (id, all = false) => {
     dispatch(deleteOneToCart({ productId: id, all }));
@@ -27,39 +25,33 @@ export default function Cart() {
   const clearCart = () => {
     dispatch(removerTodo());
   };
-
+  
+  const user = useSelector(state => state.user)
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(cartProducts));
   }, [cartProducts]);
 
   return (
-    <div className={styles.container}>
+    <div>
     <Navbar2></Navbar2>
-      <Link to="/">
-        <button className={styles.yourshoes}>
-          YOUR<span className={styles.shoes}>SHOES</span>
-        </button>
-      </Link>
 
+    <div className={styles.container}>
       {/* <button onClick={clearCart}>Limpiar carrito</button> */}
+
       <div>
         {cartProducts && cartProducts.length ? (
           <div className={styles.contenedor}>
             {cartProducts && cartProducts.map((item, index) => (
               <CartItem key={index} data={item} deleteProduct={deleteProduct} />
             ))}
-            <div>
+            <div className={styles.carrito}>
                 <h2>SUMA TOTAL: ${precios}</h2>
               <div>
-                { !Object.keys(user).length ?  <Link to='/login'><button className={styles.buttonsContainer}>
-                    Logueate para comprar
-                  </button></Link> :
                 <Link to="/mercadopago/pagos" className={styles.mpLinkBtn}>
-
                   <button className={styles.buttonsContainer}>
                     Ir a comprar
-                  </button>
-                </Link>}
+                  </button> 
+                </Link> 
                 <button className={styles.buttonsContainer} onClick={clearCart}>
                   Limpiar carrito
                 </button>
@@ -69,10 +61,11 @@ export default function Cart() {
         ) : (
           <div className={styles.containerSinDato}>
             <h5>El carrito está vacío.</h5>
-            <h5>Vuelve y escoje tus zapatillas favoritas!</h5>
+            <h5>Vuelve y escoge tus zapatillas favoritas!</h5>
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

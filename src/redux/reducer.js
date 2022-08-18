@@ -38,6 +38,10 @@ import {
   HYDRATATE_FAV_LS,
   POST_PRODUCT,
   DELETE_ONE_FROM_FAV,
+  GET_USERS,
+  CLEAN_DETAILS
+  // GET_REVIEWS,
+  // POST_REVIEW,
 } from "./actions";
 
 const initialState = {
@@ -48,7 +52,12 @@ const initialState = {
   categories: [],
   favorites: [],
   user: [],
+  users: [],
+  usersCopy: [],
   sizes: [],
+  brands: [],
+
+  reviews: [],
 };
 
 export default function rootReducer(state = initialState, action) {
@@ -58,6 +67,29 @@ export default function rootReducer(state = initialState, action) {
         ...state,
         products: action.payload,
       };
+
+    // case GET_REVIEWS:
+    //   return {
+    //     ...state,
+    //     reviews: action.payload.data,
+    //   };
+    // case POST_REVIEW:
+    //   return {
+    //     ...state,
+    //     reviews: state.reviews.concat(action.payload),
+    //   };
+    case GET_USERS: {
+      return {
+        ...state,
+        users: action.payload,
+        usersCopy: action.payload,
+      };
+    }
+    case CLEAN_DETAILS:
+            return {
+                ...state,
+                details: action.payload,
+            }
     case GET_ALL_CATEGORIES:
       return {
         ...state,
@@ -68,13 +100,16 @@ export default function rootReducer(state = initialState, action) {
         ...state,
         sizes: action.payload,
       };
+
     // case GET_ALL_CATEGORIES:
     //   return {
     //       ...state,
     //   };
+
     case GET_ALL_BRANDS:
       return {
         ...state,
+        brands: action.payload,
       };
 
     case GET_DETAILS:
@@ -107,9 +142,25 @@ export default function rootReducer(state = initialState, action) {
     case ADD_ONE_TO_CART:
       const newItem =
         state.products &&
-        state.products.find((product) => product.id === action.payload);
+        state.products.find((product) => product.id === action.payload.id);
+      const newItemSize = action.payload.size;
+      const newQuantity = action.payload.quantity;
+      console.log(action.payload, "soy reducer");
+      console.log(newQuantity, "soy newQuantity");
       let itemInCart =
         state.cart && state.cart.find((item) => item.id === newItem.id);
+      console.log(state.cart, "soy cart");
+
+      // const newItem =
+      //   state.products &&
+      //   state.products.find((product) => product.id === action.payload.id);
+      // const newItemSize =
+      //   state.sizes &&
+      //   state.sizes.find((size) => size.number === action.payload.size);
+      // let itemInCart = state.cart.find(
+      //   (item) =>
+      //     item.id === newItem.id && item.sizeNumber === newItemSize.number
+      // );
 
       return itemInCart
         ? {
@@ -124,8 +175,17 @@ export default function rootReducer(state = initialState, action) {
           }
         : {
             ...state,
-            cart: state.cart && [...state.cart, { ...newItem, quantity: 1 }],
+            cart: state.cart && [
+              ...state.cart,
+              { ...newItem, quantity: newQuantity, sizeNumber: newItemSize },
+            ],
           };
+
+    // ...state,
+    // cart: state.cart && [
+    //   ...state.cart,
+    //   { ...newItem, quantity: 1, sizeNumber: action.payload.size },
+    // ],
 
     case DELETE_ONE_FROM_CART:
       const { productId, all } = action.payload;
@@ -324,17 +384,18 @@ export default function rootReducer(state = initialState, action) {
         ...state,
         user: action.payload,
       };
+        
     case DELETE_ONE_FROM_FAV:
       const { FavId } = action.payload;
       let itemToDeleteFAv = state.favorites.find((item) => item.id === FavId);
-      console.log(FavId);
+      console.log(FavId, "id del producto en fav");
       if (itemToDeleteFAv) {
         return {
           ...state,
           favorites: state.favorites.filter((item) => item.id !== FavId),
         };
       }
-    // eslint-disable-next-line no-fallthrough
+      break;
     default:
       return state;
   }
